@@ -153,7 +153,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                   <h3 style={{ fontFamily: "'Source Serif 4', serif", fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Articles liés</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                     {related.map((a: Parameters<typeof ArticleCard>[0]['article']) => (
-                      <ArticleCard key={a.id} article={a} size="compact" />
+                      <ArticleCard key={a.id} article={a} compact={true} />
                     ))}
                   </div>
                 </div>
