@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --red: #D80621;
+  --red-dark: #A00018;
+  --white: #FFFFFF;
+  --bg: #F5F6F8;
+  --text: #121212;
+  --text-muted: #6B7280;
+  --border: #E2E4E9;
+  --border-hover: #C8CBD4;
+  --card-bg: #FFFFFF;
+  --nb-accent: #1E3A5F;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Source Serif 4', Georgia, serif;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.font-serif { font-family: 'Source Serif 4', Georgia, serif; }
+.font-sans { font-family: 'Inter', sans-serif; }
