@@ -1,10 +1,11 @@
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Source {
@@ -12,8 +13,8 @@ model Source {
   name            String
   url             String
   rssUrl          String?
-  type            String    // rss, api, scrape
-  province        String?   // NB, federal, all
+  type            String    @default("rss")
+  province        String?
   defaultCategory String?
   active          Boolean   @default(true)
   lastSyncAt      DateTime?
@@ -22,23 +23,21 @@ model Source {
   lastError       String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
-
-  articles    Article[]
-  scrapingLogs ScrapingLog[]
+  articles        Article[]
+  scrapingLogs    ScrapingLog[]
 }
 
 model Category {
-  id          String    @id @default(cuid())
-  slug        String    @unique
-  name        String
-  nameEn      String?
-  province    String?
-  color       String?
-  icon        String?
-  priority    Int       @default(0)
-  active      Boolean   @default(true)
-
-  articles    Article[]
+  id       String    @id @default(cuid())
+  slug     String    @unique
+  name     String
+  nameEn   String?
+  province String?
+  color    String?
+  icon     String?
+  priority Int       @default(0)
+  active   Boolean   @default(true)
+  articles Article[]
 }
 
 model Article {
@@ -58,23 +57,22 @@ model Article {
   province        String?
   city            String?
   importanceScore Int       @default(50)
-  status          String    @default("published") // published, draft, archived, pinned
+  status          String    @default("published")
   imageUrl        String?
   keywords        String[]  @default([])
   politicalTags   String[]  @default([])
-  policyStatus    String?   // announced, proposed, debated, adopted, in_force
+  policyStatus    String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
-
-  source    Source    @relation(fields: [sourceId], references: [id])
-  category  Category? @relation(fields: [categoryId], references: [id])
+  source          Source    @relation(fields: [sourceId], references: [id])
+  category        Category? @relation(fields: [categoryId], references: [id])
 }
 
 model WatchItem {
   id          String    @id @default(cuid())
   title       String
   description String?
-  type        String    // immigration, law, election, budget, date
+  type        String    @default("date")
   province    String?
   dueDate     DateTime?
   sourceUrl   String?
@@ -84,34 +82,24 @@ model WatchItem {
   updatedAt   DateTime  @updatedAt
 }
 
-model DailyDigest {
-  id          String    @id @default(cuid())
-  date        DateTime  @unique
-  topArticles Json      @default("[]")
-  nbArticles  Int       @default(0)
-  caArticles  Int       @default(0)
-  totalCount  Int       @default(0)
-  createdAt   DateTime  @default(now())
-}
-
 model ScrapingLog {
-  id          String    @id @default(cuid())
-  sourceId    String?
-  startedAt   DateTime  @default(now())
-  finishedAt  DateTime?
-  status      String    // running, success, error
-  articlesFetched Int   @default(0)
-  articlesNew Int       @default(0)
-  errorMessage String?
-
-  source    Source? @relation(fields: [sourceId], references: [id])
+  id              String    @id @default(cuid())
+  sourceId        String?
+  startedAt       DateTime  @default(now())
+  finishedAt      DateTime?
+  status          String    @default("running")
+  articlesFetched Int       @default(0)
+  articlesNew     Int       @default(0)
+  errorMessage    String?
+  source          Source?   @relation(fields: [sourceId], references: [id])
 }
 
-model AdminUser {
-  id          String    @id @default(cuid())
-  email       String    @unique
-  passwordHash String
-  name        String
-  createdAt   DateTime  @default(now())
-  lastLoginAt DateTime?
+model DailyDigest {
+  id          String   @id @default(cuid())
+  date        DateTime @unique
+  topArticles Json     @default("[]")
+  nbArticles  Int      @default(0)
+  caArticles  Int      @default(0)
+  totalCount  Int      @default(0)
+  createdAt   DateTime @default(now())
 }

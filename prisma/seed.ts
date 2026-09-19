@@ -1,49 +1,49 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { PrismaClient } = require('@prisma/client')
-import { INITIAL_SOURCES, CATEGORIES } from '../lib/sources'
+import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-async function main() {
-  console.log('🌱 Seeding categories…')
-  for (const cat of CATEGORIES) {
-    await prisma.category.upsert({
-      where: { slug: cat.slug },
-      update: cat,
-      create: cat,
-    })
-  }
-  console.log(`✅ ${CATEGORIES.length} catégories créées`)
+const CATEGORIES = [
+  { slug: 'gouvernement-nb', name: 'Gouvernement NB', province: 'NB', priority: 90 },
+  { slug: 'politique-nb', name: 'Politique NB', province: 'NB', priority: 88 },
+  { slug: 'immigration-nb', name: 'Immigration NB', province: 'NB', priority: 95 },
+  { slug: 'nbpnp', name: 'Programme Candidats NB', province: 'NB', priority: 92 },
+  { slug: 'emploi-nb', name: 'Emploi NB', province: 'NB', priority: 85 },
+  { slug: 'logement-nb', name: 'Logement NB', province: 'NB', priority: 82 },
+  { slug: 'sante-nb', name: 'Santé NB', province: 'NB', priority: 78 },
+  { slug: 'education-nb', name: 'Éducation NB', province: 'NB', priority: 75 },
+  { slug: 'economie-nb', name: 'Économie NB', province: 'NB', priority: 80 },
+  { slug: 'moncton', name: 'Moncton', province: 'NB', priority: 70 },
+  { slug: 'dieppe', name: 'Dieppe', province: 'NB', priority: 68 },
+  { slug: 'fredericton', name: 'Fredericton', province: 'NB', priority: 68 },
+  { slug: 'saint-john', name: 'Saint John', province: 'NB', priority: 65 },
+  { slug: 'edmundston', name: 'Edmundston', province: 'NB', priority: 63 },
+  { slug: 'actualites-nb', name: 'Actualités NB', province: 'NB', priority: 72 },
+  { slug: 'gouvernement-federal', name: 'Gouvernement fédéral', province: 'federal', priority: 85 },
+  { slug: 'politique-federale', name: 'Politique fédérale', province: 'federal', priority: 83 },
+  { slug: 'immigration-canada', name: 'Immigration Canada', province: 'federal', priority: 90 },
+  { slug: 'entree-express', name: 'Entrée express', province: 'federal', priority: 92 },
+  { slug: 'francophonie', name: 'Francophonie', province: 'federal', priority: 88 },
+  { slug: 'residence-permanente', name: 'Résidence permanente', province: 'federal', priority: 88 },
+  { slug: 'permis-travail', name: 'Permis de travail', province: 'federal', priority: 85 },
+  { slug: 'permis-etudes', name: "Permis d'études", province: 'federal', priority: 82 },
+  { slug: 'citoyennete', name: 'Citoyenneté', province: 'federal', priority: 80 },
+  { slug: 'economie', name: 'Économie', province: 'federal', priority: 80 },
+  { slug: 'emploi', name: 'Emploi', province: 'federal', priority: 78 },
+  { slug: 'logement', name: 'Logement', province: 'federal', priority: 78 },
+  { slug: 'sante', name: 'Santé', province: 'federal', priority: 75 },
+  { slug: 'taux-interet', name: "Taux d'intérêt", province: 'federal', priority: 82 },
+  { slug: 'inflation', name: 'Inflation', province: 'federal', priority: 80 },
+  { slug: 'fiscalite', name: 'Fiscalité', province: 'federal', priority: 75 },
+  { slug: 'actualites', name: 'Actualités Canada', province: 'federal', priority: 60 },
+]
 
-  console.log('🌱 Seeding sources…')
-  for (const src of INITIAL_SOURCES) {
-    const existing = await prisma.source.findFirst({ where: { url: src.url } })
-    if (!existing) {
-      await prisma.source.create({ data: src })
-    }
+async function main() {
+  console.log('🌱 Seeding...')
+  for (const cat of CATEGORIES) {
+    await prisma.category.upsert({ where: { slug: cat.slug }, update: cat, create: cat })
   }
-  console.log(`✅ ${INITIAL_SOURCES.length} sources vérifiées/créées`)
-  
-  console.log('🌱 Seeding watch items…')
-  const watchItems = [
-    { title: 'Prochain tirage Entrée Express', description: 'Les tirages Entrée Express ont lieu environ toutes les 2 semaines. Suivez le score CRS minimum requis et le nombre d\'invitations émises.', type: 'immigration', province: 'federal', priority: 95 },
-    { title: 'Programme Candidats NB (NBPNP)', description: 'Ouvertures périodiques des différents volets du Programme des candidats du Nouveau-Brunswick pour les travailleurs qualifiés, entrepreneurs et étudiants diplômés.', type: 'immigration', province: 'NB', priority: 92 },
-    { title: 'Mises à jour IRCC — Délais de traitement', description: 'L\'IRCC met à jour régulièrement les délais de traitement pour les demandes de résidence permanente, permis de travail et d\'études.', type: 'immigration', province: 'federal', priority: 80 },
-    { title: 'Budget fédéral Canada', description: 'Le budget fédéral est généralement présenté au printemps. Attendez-vous à des annonces importantes sur l\'immigration, le logement et le marché du travail.', type: 'budget', province: 'federal', priority: 88 },
-    { title: 'Décision taux directeur — Banque du Canada', description: 'La Banque du Canada annonce ses décisions sur les taux directeurs environ 8 fois par an. Ces décisions affectent les taux hypothécaires et le coût du crédit.', type: 'date', province: 'federal', priority: 82 },
-    { title: 'Nouvelles données sur le logement', description: 'Statistique Canada publie régulièrement des données sur le marché du logement, les prix et les nouvelles constructions.', type: 'date', province: 'federal', priority: 70 },
-    { title: 'Salaire minimum NB', description: 'Le salaire minimum au Nouveau-Brunswick est révisé annuellement. Toute modification est annoncée plusieurs mois à l\'avance.', type: 'law', province: 'NB', priority: 75 },
-  ]
-  
-  for (const item of watchItems) {
-    await prisma.watchItem.create({ data: item }).catch(() => {})
-  }
-  console.log('✅ Watch items créés')
-  
-  console.log('\n🎉 Seed terminé avec succès !')
-  console.log('👉 Prochaine étape: lancez une collecte depuis /admin')
+  console.log(`✅ ${CATEGORIES.length} catégories`)
+  console.log('🎉 Seed terminé')
 }
 
-main()
-  .catch(e => { console.error(e); process.exit(1) })
-  .finally(() => prisma.$disconnect())
+main().catch(e => { console.error(e); process.exit(1) }).finally(() => prisma.$disconnect())
