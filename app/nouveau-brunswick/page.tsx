@@ -4,7 +4,7 @@ import ArticleCard, { Article } from '@/components/ArticleCard'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
-export const revalidate = 1800
+export const dynamic = 'force-dynamic'
 
 export default async function NouveauBrunswickPage({ searchParams }: { searchParams: Promise<{ categorie?: string; ville?: string }> }) {
   const params = await searchParams

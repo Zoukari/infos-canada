@@ -4,7 +4,7 @@ import ArticleCard, { Article } from '@/components/ArticleCard'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
-export const revalidate = 1800
+export const dynamic = 'force-dynamic'
 
 const CONFIG: Record<string, { title: string; desc: string; icon: string; slugs: string[]; color: string }> = {
   politique: { title: 'Politique', desc: 'Politique provinciale et fédérale canadienne', icon: '🏛️', slugs: ['politique-nb','politique-federale','gouvernement-nb','gouvernement-federal'], color: '#1E3A5F' },

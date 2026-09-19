@@ -4,7 +4,7 @@ import ArticleCard, { Article } from '@/components/ArticleCard'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
-export const revalidate = 900
+export const dynamic = 'force-dynamic'
 
 async function getData() {
   try {
@@ -111,7 +111,7 @@ export default async function HomePage() {
             </div>
             <aside style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <SideCard title="⚑ À surveiller" color="#1E3A5F" href="/a-surveiller">
-                {watch.map(item => (
+                {watch.map((item: { id: string; title: string; description?: string | null; type: string }) => (
                   <div key={item.id} style={{ padding: '11px 0', borderBottom: '1px solid #E5E7EB' }}>
                     <div style={{ fontSize: 11, color: '#C8102E', fontWeight: 600, textTransform: 'uppercase', marginBottom: 3 }}>
                       {item.type === 'immigration' ? 'Immigration' : item.type === 'budget' ? 'Budget' : 'Date clé'}

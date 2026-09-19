@@ -4,7 +4,7 @@ import ArticleCard, { Article } from '@/components/ArticleCard'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 
-export const revalidate = 1800
+export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Immigration Canada — Entrée express, NBPNP, francophonie' }
 
 const SECTIONS = [
@@ -75,7 +75,7 @@ export default async function ImmigrationPage() {
               </div>
               <div style={{ padding: '0 16px' }}>
                 {watchItems.length === 0 ? <div style={{ padding: '14px 0', fontSize: 13, color: '#9CA3AF' }}>Aucune échéance</div> :
-                  watchItems.map(item => (
+                  watchItems.map((item: { id: string; title: string; description?: string | null }) => (
                     <div key={item.id} style={{ padding: '12px 0', borderBottom: '1px solid #E5E7EB' }}>
                       <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 3 }}>{item.title}</div>
                       {item.description && <div style={{ fontSize: 12, color: '#6B7280', lineHeight: 1.5 }}>{item.description.substring(0,100)}…</div>}
