@@ -4,14 +4,14 @@ import './globals.css'
 export const metadata: Metadata = {
   title: { template: '%s | Infos Canada', default: 'Infos Canada — L\'actualité essentielle pour vivre et immigrer au Canada' },
   description: 'Actualités immigration, emploi, logement et politique au Canada — priorité Nouveau-Brunswick.',
+  icons: {
+    icon: '/maple-leaf.jpg',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <head>
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-      </head>
       <body>
         <div id="splash" style={{
           position: 'fixed', inset: 0, zIndex: 9999,
@@ -19,17 +19,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
           animation: 'splashOut 0.5s ease-in-out 2.8s forwards',
-          pointerEvents: 'none',
         }}>
           <img src="/maple-leaf.jpg" alt="Feuille d'érable" style={{
-            width: 120, height: 120, objectFit: 'contain',
+            width: 130, height: 130, objectFit: 'contain',
             animation: 'leafIn 0.7s ease-out forwards',
+            mixBlendMode: 'multiply',
           }} />
           <h1 style={{
             fontFamily: 'Source Serif 4, serif',
             fontSize: 'clamp(28px, 6vw, 48px)',
             fontWeight: 700, color: '#C8102E',
-            marginTop: 20, marginBottom: 12,
+            marginTop: 16, marginBottom: 12,
             animation: 'textIn 0.7s ease-out 0.4s both',
           }}>
             Infos Canada
@@ -46,18 +46,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
         {children}
         <style>{`
-          @keyframes leafIn {
-            from { opacity:0; transform: scale(0.5) rotate(-20deg); }
-            to { opacity:1; transform: scale(1) rotate(0deg); }
-          }
-          @keyframes textIn {
-            from { opacity:0; transform: translateY(20px); }
-            to { opacity:1; transform: translateY(0); }
-          }
-          @keyframes splashOut {
-            from { opacity:1; transform: scale(1); }
-            to { opacity:0; transform: scale(1.05); pointer-events: none; visibility: hidden; }
-          }
+          @keyframes leafIn { from { opacity:0; transform: scale(0.5) rotate(-20deg); } to { opacity:1; transform: scale(1) rotate(0deg); } }
+          @keyframes textIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+          @keyframes splashOut { from { opacity:1; } to { opacity:0; visibility: hidden; pointer-events: none; } }
         `}</style>
       </body>
     </html>
