@@ -61,7 +61,7 @@ export default function Admin() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <Link href="/" style={{ color: '#64748B', textDecoration: 'none', fontSize: 13 }}>← Site</Link>
             <span style={{ color: '#334155' }}>|</span>
-            <img src="/maple-leaf.jpg" width={24} height={24} alt="" style={{ mixBlendMode: 'multiply' }} />
+            <img src="/maple-leaf.png" width={24} height={24} alt="" />
             <span style={{ fontFamily: 'Source Serif 4,serif', fontSize: 17, fontWeight: 700 }}>Infos Canada — Admin</span>
           </div>
           <button onClick={() => scrape()} disabled={scraping}

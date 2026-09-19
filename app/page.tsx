@@ -48,7 +48,7 @@ export default async function HomePage() {
         <div style={{ background: 'linear-gradient(135deg,#0F172A,#1E3A5F)', color: '#fff', padding: '40px 16px' }}>
           <div className="container">
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
-              <div style={{ width: 56, height: 56, background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8 }}><img src="/maple-leaf.jpg" alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'multiply' }} /></div>
+              <img src="/maple-leaf.png" alt="" style={{ width: 52, height: 52, objectFit: 'contain' }} />
               <div>
                 <h1 style={{ fontFamily: 'Source Serif 4,serif', fontSize: 'clamp(22px,5vw,40px)', fontWeight: 700, lineHeight: 1.2 }}>
                   Infos Canada

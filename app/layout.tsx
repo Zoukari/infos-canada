@@ -4,9 +4,6 @@ import './globals.css'
 export const metadata: Metadata = {
   title: { template: '%s | Infos Canada', default: 'Infos Canada — L\'actualité essentielle pour vivre et immigrer au Canada' },
   description: 'Actualités immigration, emploi, logement et politique au Canada — priorité Nouveau-Brunswick.',
-  icons: {
-    icon: '/maple-leaf.jpg',
-  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -20,10 +17,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           alignItems: 'center', justifyContent: 'center',
           animation: 'splashOut 0.5s ease-in-out 2.8s forwards',
         }}>
-          <img src="/maple-leaf.jpg" alt="Feuille d'érable" style={{
+          <img src="/maple-leaf.png" alt="Feuille d'érable" style={{
             width: 130, height: 130, objectFit: 'contain',
             animation: 'leafIn 0.7s ease-out forwards',
-            mixBlendMode: 'multiply',
           }} />
           <h1 style={{
             fontFamily: 'Source Serif 4, serif',
@@ -46,8 +42,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
         {children}
         <style>{`
-          @keyframes leafIn { from { opacity:0; transform: scale(0.5) rotate(-20deg); } to { opacity:1; transform: scale(1) rotate(0deg); } }
-          @keyframes textIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+          @keyframes leafIn { 0% { opacity:0; transform: scale(0.3) rotate(-25deg); } 60% { opacity:1; transform: scale(1.1) rotate(5deg); } 100% { opacity:1; transform: scale(1) rotate(0deg); } }
+          @keyframes textIn { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
           @keyframes splashOut { from { opacity:1; } to { opacity:0; visibility: hidden; pointer-events: none; } }
         `}</style>
       </body>
