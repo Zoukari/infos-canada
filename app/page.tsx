@@ -220,3 +220,4 @@ function EmptySection({ label }: { label: string }) {
     </div>
   )
 }
+// (no change needed — bandeau already handles empty state)
