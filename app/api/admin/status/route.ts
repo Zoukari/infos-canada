@@ -8,7 +8,8 @@ export async function GET() {
     prisma.article.findFirst({ orderBy: { scrapedAt: 'desc' } }),
     prisma.source.count({ where: { active: true } }),
     prisma.scrapingLog.findMany({
-      orderBy: { startedAt: 'desc' }, take: 5,
+      orderBy: { startedAt: 'desc' },
+      take: 50, // 50 derniers runs
       include: { source: { select: { name: true } } }
     })
   ])

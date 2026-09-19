@@ -2,17 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: {
-    template: '%s | Infos Canada',
-    default: 'Infos Canada — Toute l\'actualité utile du Canada',
-  },
-  description: 'Actualités, immigration, politique, emploi, logement et économie au Canada, avec une priorité sur le Nouveau-Brunswick.',
-  keywords: ['Canada', 'Nouveau-Brunswick', 'immigration', 'emploi', 'logement'],
-  openGraph: {
-    siteName: 'Infos Canada',
-    type: 'website',
-    locale: 'fr_CA',
-  },
+  title: { template: '%s | Infos Canada', default: 'Infos Canada — L\'actualité essentielle pour vivre et immigrer au Canada' },
+  description: 'Actualités immigration, emploi, logement et politique au Canada — priorité Nouveau-Brunswick.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -21,7 +12,54 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       </head>
-      <body>{children}</body>
+      <body>
+        <div id="splash" style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: '#fff',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          animation: 'splashOut 0.5s ease-in-out 2.8s forwards',
+          pointerEvents: 'none',
+        }}>
+          <img src="/maple-leaf.jpg" alt="Feuille d'érable" style={{
+            width: 120, height: 120, objectFit: 'contain',
+            animation: 'leafIn 0.7s ease-out forwards',
+          }} />
+          <h1 style={{
+            fontFamily: 'Source Serif 4, serif',
+            fontSize: 'clamp(28px, 6vw, 48px)',
+            fontWeight: 700, color: '#C8102E',
+            marginTop: 20, marginBottom: 12,
+            animation: 'textIn 0.7s ease-out 0.4s both',
+          }}>
+            Infos Canada
+          </h1>
+          <p style={{
+            fontFamily: 'Inter, sans-serif',
+            fontSize: 'clamp(14px, 3vw, 18px)',
+            color: '#444', textAlign: 'center',
+            maxWidth: 480, padding: '0 24px', lineHeight: 1.5,
+            animation: 'textIn 0.7s ease-out 0.7s both',
+          }}>
+            Tout ce qu&apos;il faut savoir pour vivre, travailler et s&apos;installer au Canada — au même endroit, chaque jour.
+          </p>
+        </div>
+        {children}
+        <style>{`
+          @keyframes leafIn {
+            from { opacity:0; transform: scale(0.5) rotate(-20deg); }
+            to { opacity:1; transform: scale(1) rotate(0deg); }
+          }
+          @keyframes textIn {
+            from { opacity:0; transform: translateY(20px); }
+            to { opacity:1; transform: translateY(0); }
+          }
+          @keyframes splashOut {
+            from { opacity:1; transform: scale(1); }
+            to { opacity:0; transform: scale(1.05); pointer-events: none; visibility: hidden; }
+          }
+        `}</style>
+      </body>
     </html>
   )
 }
