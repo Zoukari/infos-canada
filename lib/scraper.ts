@@ -157,7 +157,8 @@ export async function scrapeSource(sourceId: string): Promise<{ fetched: number;
       const description = item.contentSnippet || item.content || item.summary || ''
       const fullText = titleText + ' ' + description
       
-      const province = detectProvince(fullText) || source.province || 'CA'
+      const detectedProvince = detectProvince(fullText)
+      const province = detectedProvince !== 'CA' ? detectedProvince : (source.province || 'CA')
       const city = detectCity(fullText)
       const categorySlug = detectCategorySlug(fullText, source.defaultCategory)
       const importanceScore = calculateImportance(fullText, province, categorySlug)
