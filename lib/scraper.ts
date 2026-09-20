@@ -7,7 +7,15 @@ const parser = new Parser({
   headers: {
     'User-Agent': 'InfosCanada-Bot/1.0 (https://infos-canada.vercel.app; contact@infos-canada.ca)',
   },
+  customFields: {
+    item: ['source'],
+  },
 })
+
+// Google News ajoute " - NomDuMédia" à la fin du titre — on nettoie
+function cleanGoogleNewsTitle(title: string): string {
+  return title.replace(/\s+-\s+[^-]{2,40}$/, '').trim()
+}
 
 function slugify(text: string): string {
   return text
@@ -153,7 +161,8 @@ export async function scrapeSource(sourceId: string): Promise<{ fetched: number;
       const existing = await prisma.article.findUnique({ where: { originalUrl: item.link } })
       if (existing) continue
       
-      const titleText = item.title
+      const isGoogleNews = source.url?.includes('news.google.com')
+      const titleText = isGoogleNews ? cleanGoogleNewsTitle(item.title) : item.title
       const description = item.contentSnippet || item.content || item.summary || ''
       const fullText = titleText + ' ' + description
       
