@@ -4,6 +4,11 @@ import './globals.css'
 export const metadata: Metadata = {
   title: { template: '%s | Infos Canada', default: 'Infos Canada — L\'actualité essentielle pour vivre et immigrer au Canada' },
   description: 'Actualités immigration, emploi, logement et politique au Canada — priorité Nouveau-Brunswick.',
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/icon.png',
+    apple: '/icon.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
