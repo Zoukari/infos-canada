@@ -6,13 +6,13 @@ import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-const CONFIG: Record<string, { title: string; desc: string; icon: string; slugs: string[]; color: string }> = {
-  politique: { title: 'Politique', desc: 'Politique provinciale et fédérale canadienne', icon: '🏛️', slugs: ['politique-nb','politique-federale','gouvernement-nb','gouvernement-federal'], color: '#1E3A5F' },
-  emploi: { title: 'Emploi', desc: 'Marché du travail, salaires, recrutement', icon: '💼', slugs: ['emploi-nb','emploi'], color: '#15803D' },
-  logement: { title: 'Logement', desc: 'Loyers, immobilier, aides au logement', icon: '🏠', slugs: ['logement-nb','logement'], color: '#B45309' },
-  economie: { title: 'Économie', desc: 'Inflation, taux d\'intérêt, finances', icon: '📊', slugs: ['economie','economie-nb','taux-interet','inflation'], color: '#7C3AED' },
-  sante: { title: 'Santé', desc: 'Services de santé, hôpitaux, médecins', icon: '🏥', slugs: ['sante','sante-nb'], color: '#C8102E' },
-  canada: { title: 'Canada', desc: 'Toutes les actualités nationales', icon: '🍁', slugs: ['actualites','gouvernement-federal','politique-federale','economie'], color: '#C8102E' },
+const CONFIG: Record<string, { title: string; desc: string; slugs: string[]; accent: string }> = {
+  politique: { title: 'Politique', desc: 'Politique provinciale et fédérale canadienne', slugs: ['politique-nb','politique-federale','gouvernement-nb','gouvernement-federal'], accent: 'var(--nb)' },
+  emploi: { title: 'Emploi', desc: 'Marché du travail, salaires, recrutement', slugs: ['emploi-nb','emploi'], accent: '#3D7A4D' },
+  logement: { title: 'Logement', desc: 'Loyers, immobilier, aides au logement', slugs: ['logement-nb','logement'], accent: 'var(--gold)' },
+  economie: { title: 'Économie', desc: 'Inflation, taux d\'intérêt, finances', slugs: ['economie','economie-nb','taux-interet','inflation'], accent: '#6B4C9A' },
+  sante: { title: 'Santé', desc: 'Services de santé, hôpitaux, médecins', slugs: ['sante','sante-nb'], accent: 'var(--red)' },
+  canada: { title: 'Canada', desc: 'Toutes les actualités nationales', slugs: ['actualites','gouvernement-federal','politique-federale','economie'], accent: 'var(--red)' },
 }
 
 const SLUG = 'politique'
@@ -20,10 +20,7 @@ const SLUG = 'politique'
 export default async function Page() {
   const c = CONFIG[SLUG]
   const articles = await prisma.article.findMany({
-    where: {
-      status: { in: ['published','pinned'] },
-      OR: c.slugs.map(s => ({ category: { slug: s } }))
-    },
+    where: { status: { in: ['published','pinned'] }, OR: c.slugs.map(s => ({ category: { slug: s } })) },
     include: { source: { select: { name: true } }, category: { select: { name: true, slug: true } } },
     orderBy: [{ importanceScore: 'desc' }, { publishedAt: 'desc' }],
     take: 30,
@@ -33,28 +30,25 @@ export default async function Page() {
     <>
       <Header />
       <main>
-        <div style={{ background: c.color, color: '#fff', padding: '36px 16px' }}>
+        <div className="page-header" style={{ ['--accent' as string]: c.accent }}>
           <div className="container">
-            <h1 style={{ fontFamily: 'Source Serif 4,serif', fontSize: 'clamp(22px,4vw,36px)', fontWeight: 700, marginBottom: 6 }}>
-              {c.icon} {c.title}
-            </h1>
-            <p style={{ color: 'rgba(255,255,255,.8)', fontSize: 15 }}>{c.desc}</p>
+            <h1 style={{ fontFamily: 'Source Serif 4,serif', fontSize: 'clamp(24px,4vw,34px)', fontWeight: 600, marginBottom: 6, color: 'var(--ink)' }}>{c.title}</h1>
+            <p style={{ color: 'var(--ink-soft)', fontSize: 15 }}>{c.desc}</p>
           </div>
         </div>
-        <div className="container" style={{ padding: '24px 16px' }}>
+        <div className="container" style={{ padding: '28px 20px' }}>
           {articles.length === 0 ? (
-            <div style={{ padding: '48px 24px', textAlign: 'center', background: '#fff', border: '1px dashed #E5E7EB', borderRadius: 10 }}>
-              <div style={{ fontSize: 32, marginBottom: 10 }}>🔄</div>
-              <h2 style={{ fontFamily: 'Source Serif 4,serif', fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Collecte en attente</h2>
-              <p style={{ fontSize: 14, color: '#6B7280', maxWidth: 360, margin: '0 auto 16px' }}>
+            <div style={{ padding: '48px 24px', textAlign: 'center', background: 'var(--card)', border: '1px dashed var(--border)', borderRadius: 6 }}>
+              <h2 style={{ fontFamily: 'Source Serif 4,serif', fontSize: 18, fontWeight: 600, marginBottom: 8, color: 'var(--ink)' }}>Collecte en attente</h2>
+              <p style={{ fontSize: 14, color: 'var(--ink-soft)', maxWidth: 360, margin: '0 auto 16px' }}>
                 Lancez une collecte depuis l&apos;administration pour récupérer les articles.
               </p>
-              <Link href="/admin" style={{ display: 'inline-block', background: '#C8102E', color: '#fff', padding: '9px 20px', borderRadius: 6, textDecoration: 'none', fontWeight: 600, fontSize: 14 }}>
+              <Link href="/admin" style={{ display: 'inline-block', background: 'var(--ink)', color: '#fff', padding: '9px 20px', borderRadius: 3, textDecoration: 'none', fontWeight: 500, fontSize: 14 }}>
                 Administration →
               </Link>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 14 }}>
               {articles.map((a: Article) => <ArticleCard key={a.id} article={a} />)}
             </div>
           )}

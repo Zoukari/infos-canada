@@ -6,133 +6,139 @@ import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-async function getData() {
+async function getTopArticles() {
   try {
-    const [top, nb, watch, lastSync] = await Promise.all([
-      prisma.article.findMany({
-        where: { status: { in: ['published','pinned'] } },
-        include: { source: { select: { name: true } }, category: { select: { name: true, slug: true } } },
-        orderBy: [{ importanceScore: 'desc' }, { publishedAt: 'desc' }],
-        take: 8,
-      }),
-      prisma.article.findMany({
-        where: { province: 'NB', status: { in: ['published','pinned'] } },
-        include: { source: { select: { name: true } }, category: { select: { name: true, slug: true } } },
-        orderBy: [{ importanceScore: 'desc' }, { publishedAt: 'desc' }],
-        take: 8,
-      }),
-      prisma.watchItem.findMany({ where: { active: true }, orderBy: { priority: 'desc' }, take: 4 }),
-      prisma.scrapingLog.findFirst({ orderBy: { startedAt: 'desc' } }),
-    ])
-    return { top, nb, watch, lastSync: lastSync?.finishedAt || null }
-  } catch { return { top: [], nb: [], watch: [], lastSync: null } }
+    return await prisma.article.findMany({
+      where: { status: { in: ['published', 'pinned'] } },
+      include: { source: { select: { name: true } }, category: { select: { name: true, slug: true } } },
+      orderBy: [{ importanceScore: 'desc' }, { publishedAt: 'desc' }],
+      take: 8,
+    })
+  } catch { return [] }
+}
+async function getNBArticles() {
+  try {
+    return await prisma.article.findMany({
+      where: { province: 'NB', status: { in: ['published', 'pinned'] } },
+      include: { source: { select: { name: true } }, category: { select: { name: true, slug: true } } },
+      orderBy: [{ importanceScore: 'desc' }, { publishedAt: 'desc' }],
+      take: 8,
+    })
+  } catch { return [] }
+}
+async function getWatchItems() {
+  try { return await prisma.watchItem.findMany({ where: { active: true }, orderBy: { priority: 'desc' }, take: 4 }) } catch { return [] }
+}
+async function getLastSync() {
+  try { const log = await prisma.scrapingLog.findFirst({ orderBy: { startedAt: 'desc' } }); return log?.finishedAt || null } catch { return null }
 }
 
-function ago(date: Date) {
-  const m = Math.floor((Date.now() - date.getTime()) / 60000)
-  if (m < 1) return 'à l\'instant'
-  if (m < 60) return `il y a ${m}min`
-  const h = Math.floor(m / 60)
-  return `il y a ${h}h${m % 60 > 0 ? ` ${m % 60}min` : ''}`
+function timeAgo(date: Date) {
+  const diff = Math.floor((Date.now() - date.getTime()) / 60000)
+  if (diff < 1) return 'à l\'instant'
+  if (diff < 60) return `il y a ${diff} min`
+  const h = Math.floor(diff / 60)
+  return `il y a ${h}h${diff % 60 > 0 ? ` ${diff % 60}min` : ''}`
 }
 
 export default async function HomePage() {
-  const { top, nb, watch, lastSync } = await getData()
-  const empty = top.length === 0 && nb.length === 0
+  const [top, nb, watch, lastSync] = await Promise.all([getTopArticles(), getNBArticles(), getWatchItems(), getLastSync()])
+  const isEmpty = top.length === 0 && nb.length === 0
 
   return (
     <>
       <Header />
       <main>
-        {/* Hero — sans les badges */}
-        <div style={{ background: 'linear-gradient(135deg,#0F172A,#1E3A5F)', color: '#fff', padding: '40px 16px' }}>
-          <div className="container">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
-              <img src="/maple-leaf.png" alt="" style={{ width: 52, height: 52, objectFit: 'contain' }} />
-              <div>
-                <h1 style={{ fontFamily: 'Source Serif 4,serif', fontSize: 'clamp(22px,5vw,40px)', fontWeight: 700, lineHeight: 1.2 }}>
-                  Infos Canada
-                </h1>
-                <p style={{ color: 'rgba(255,255,255,.7)', fontSize: 13, marginTop: 2 }}>
-                  {lastSync ? `Dernière mise à jour ${ago(new Date(lastSync))}` : 'Actualités automatisées'}
-                </p>
+        {/* Hero — éditorial sobre */}
+        <div style={{ background: 'var(--card)', borderBottom: '1px solid var(--border)' }}>
+          <div className="container" style={{ padding: '48px 20px 40px' }}>
+            <div style={{ maxWidth: 640 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+                <span style={{ width: 28, height: 2, background: 'var(--red)', display: 'inline-block' }} />
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '.1em' }}>
+                  Édition du {new Date().toLocaleDateString('fr-CA', { day: 'numeric', month: 'long' })}
+                </span>
               </div>
-            </div>
-            <p style={{ color: 'rgba(255,255,255,.85)', fontSize: 'clamp(15px,3vw,19px)', maxWidth: 560, marginBottom: 24, lineHeight: 1.6 }}>
-              Tout ce qu&apos;il faut savoir pour vivre, travailler et s&apos;installer au Canada — au même endroit, chaque jour.
-            </p>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              {[['✈️ Immigration','/immigration',true],['📍 Nouveau-Brunswick','/nouveau-brunswick',false],['⚑ À surveiller','/a-surveiller',false]].map(([l,h,p]) => (
-                <Link key={String(h)} href={String(h)} style={{ background: p ? '#C8102E' : 'rgba(255,255,255,.12)', color: '#fff', padding: '9px 16px', borderRadius: 6, textDecoration: 'none', fontSize: 13, fontWeight: p ? 600 : 400, border: '1px solid rgba(255,255,255,.15)' }}>
-                  {String(l)}
+              <h1 style={{ fontFamily: 'Source Serif 4,serif', fontSize: 'clamp(28px,5vw,46px)', fontWeight: 600, lineHeight: 1.15, color: 'var(--ink)', marginBottom: 18, letterSpacing: '-0.01em' }}>
+                Tout ce qu&apos;il faut savoir pour vivre, travailler et s&apos;installer au Canada.
+              </h1>
+              <p style={{ color: 'var(--ink-soft)', fontSize: 16, lineHeight: 1.65, marginBottom: 26 }}>
+                Immigration, emploi, logement et politique — avec une attention particulière au Nouveau-Brunswick.
+                {lastSync && <span style={{ display: 'block', marginTop: 6, fontSize: 13, color: '#9C9C9C' }}>Dernière mise à jour {timeAgo(new Date(lastSync))}</span>}
+              </p>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <Link href="/immigration" style={{ background: 'var(--ink)', color: '#fff', padding: '10px 20px', borderRadius: 3, textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>
+                  Immigration
                 </Link>
-              ))}
+                <Link href="/nouveau-brunswick" style={{ background: 'transparent', color: 'var(--ink)', padding: '10px 20px', borderRadius: 3, textDecoration: 'none', fontSize: 14, border: '1px solid var(--border)' }}>
+                  Nouveau-Brunswick
+                </Link>
+                <Link href="/a-surveiller" style={{ background: 'transparent', color: 'var(--ink)', padding: '10px 20px', borderRadius: 3, textDecoration: 'none', fontSize: 14, border: '1px solid var(--border)' }}>
+                  À surveiller
+                </Link>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Thèmes */}
-        <div style={{ background: '#fff', borderBottom: '1px solid #E5E7EB', overflowX: 'auto' }}>
+        <div style={{ background: 'var(--paper)', borderBottom: '1px solid var(--border)', overflowX: 'auto' }}>
           <div className="container" style={{ display: 'flex' }}>
-            {[['✈️','Immigration','/immigration'],['💼','Emploi','/emploi'],['🏠','Logement','/logement'],['📊','Économie','/economie'],['🏥','Santé','/sante'],['🏛️','Politique','/politique']].map(([icon,label,href]) => (
-              <Link key={String(href)} href={String(href)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, padding: '10px 14px', fontSize: 12, textDecoration: 'none', color: '#374151', whiteSpace: 'nowrap', borderRight: '1px solid #E5E7EB' }}>
-                <span style={{ fontSize: 18 }}>{String(icon)}</span>{String(label)}
+            {[['Immigration','/immigration'],['Emploi','/emploi'],['Logement','/logement'],['Économie','/economie'],['Santé','/sante'],['Politique','/politique']].map(([label,href]) => (
+              <Link key={href} href={href} style={{ padding: '11px 16px', fontSize: 13, textDecoration: 'none', color: 'var(--ink-soft)', whiteSpace: 'nowrap', borderRight: '1px solid var(--border-soft)' }}>
+                {label}
               </Link>
             ))}
           </div>
         </div>
 
-        <div className="container" style={{ padding: '24px 16px' }}>
-          {/* Bandeau vide */}
-          {empty && (
-            <div style={{ background: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: 10, padding: '24px', marginBottom: 24, textAlign: 'center' }}>
-              <div style={{ fontSize: 32, marginBottom: 10 }}>⏳</div>
-              <h2 style={{ fontFamily: 'Source Serif 4,serif', fontSize: 18, fontWeight: 700, marginBottom: 8, color: '#92400E' }}>Aucun article disponible</h2>
-              <p style={{ fontSize: 14, color: '#78350F', maxWidth: 380, margin: '0 auto 16px' }}>
-                {lastSync ? `Dernière collecte ${ago(new Date(lastSync))} — aucun article récupéré.` : 'Collecte jamais lancée.'}
-                {' '}Lancez la collecte depuis l&apos;administration.
+        <div className="container" style={{ padding: '32px 20px' }}>
+          {isEmpty && (
+            <div style={{ background: 'var(--red-soft)', border: '1px solid #F5D0D0', borderRadius: 6, padding: '24px', marginBottom: 28, textAlign: 'center' }}>
+              <h2 style={{ fontFamily: 'Source Serif 4,serif', fontSize: 18, fontWeight: 600, marginBottom: 8, color: '#7F1D24' }}>Aucun article disponible</h2>
+              <p style={{ fontSize: 14, color: '#8A4A4A', maxWidth: 380, margin: '0 auto 16px' }}>
+                {lastSync ? `Dernière collecte ${timeAgo(new Date(lastSync))} — aucun article récupéré.` : 'Collecte jamais lancée.'}
               </p>
-              <Link href="/admin" style={{ display: 'inline-block', background: '#C8102E', color: '#fff', padding: '10px 22px', borderRadius: 6, textDecoration: 'none', fontWeight: 600, fontSize: 14 }}>
-                🔄 Administration →
+              <Link href="/admin" style={{ display: 'inline-block', background: 'var(--ink)', color: '#fff', padding: '9px 20px', borderRadius: 3, textDecoration: 'none', fontWeight: 500, fontSize: 14 }}>
+                Administration →
               </Link>
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 28, alignItems: 'start' }} className="grid-sidebar">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 32, alignItems: 'start' }} className="grid-sidebar">
             <div>
-              <Section title="L'essentiel aujourd'hui" href="/canada" color="#C8102E">
+              <Section title="L'essentiel aujourd'hui" href="/canada">
                 {top.length === 0 ? <Empty /> : top.map((a: Article) => <ArticleCard key={a.id} article={a} />)}
               </Section>
-              <div style={{ marginTop: 36 }}>
-                <Section title="Nouveau-Brunswick" href="/nouveau-brunswick" color="#1E3A5F">
+              <div style={{ marginTop: 40 }}>
+                <Section title="Nouveau-Brunswick" href="/nouveau-brunswick">
                   {nb.length === 0 ? <Empty /> : nb.map((a: Article) => <ArticleCard key={a.id} article={a} />)}
                 </Section>
               </div>
             </div>
-            <aside style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <SideCard title="⚑ À surveiller" color="#1E3A5F" href="/a-surveiller">
+            <aside style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <SideCard title="À surveiller" href="/a-surveiller">
                 {watch.map((item: { id: string; title: string; description?: string | null; type: string }) => (
-                  <div key={item.id} style={{ padding: '11px 0', borderBottom: '1px solid #E5E7EB' }}>
-                    <div style={{ fontSize: 11, color: '#C8102E', fontWeight: 600, textTransform: 'uppercase', marginBottom: 3 }}>
+                  <div key={item.id} style={{ padding: '12px 0', borderBottom: '1px solid var(--border-soft)' }}>
+                    <div style={{ fontSize: 11, color: 'var(--red)', fontWeight: 600, textTransform: 'uppercase', marginBottom: 4, letterSpacing: '.03em' }}>
                       {item.type === 'immigration' ? 'Immigration' : item.type === 'budget' ? 'Budget' : 'Date clé'}
                     </div>
-                    <div style={{ fontSize: 13, fontWeight: 600 }}>{item.title}</div>
-                    {item.description && <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2, lineHeight: 1.5 }}>{item.description.substring(0,90)}…</div>}
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>{item.title}</div>
                   </div>
                 ))}
-                {watch.length === 0 && <div style={{ padding: '12px 0', fontSize: 13, color: '#9CA3AF' }}>Aucun élément</div>}
+                {watch.length === 0 && <div style={{ padding: '12px 0', fontSize: 13, color: '#9C9C9C' }}>Aucun élément</div>}
               </SideCard>
-              <SideCard title="📍 Villes NB" color="#1E3A5F" href="/nouveau-brunswick">
+              <SideCard title="Villes du N.-B." href="/nouveau-brunswick">
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                   {['Moncton','Dieppe','Fredericton','Saint John','Edmundston','Campbellton'].map(c => (
-                    <Link key={c} href={`/nouveau-brunswick?ville=${c}`} style={{ padding: '6px 8px', background: '#F4F5F7', borderRadius: 6, fontSize: 12, textDecoration: 'none', color: '#374151', textAlign: 'center' }}>{c}</Link>
+                    <Link key={c} href={`/nouveau-brunswick?ville=${c}`} style={{ padding: '7px 8px', background: 'var(--paper)', borderRadius: 3, fontSize: 12, textDecoration: 'none', color: 'var(--ink-soft)', textAlign: 'center' }}>{c}</Link>
                   ))}
                 </div>
               </SideCard>
-              <SideCard title="✈️ Immigration" color="#1E3A5F" href="/immigration">
-                {[['Entrée express','/immigration#entree-express'],['NBPNP','/immigration#nbpnp'],['Francophonie','/immigration#francophonie'],['IRCC','/immigration#immigration-canada']].map(([l,h]) => (
-                  <Link key={String(h)} href={String(h)} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid #E5E7EB', fontSize: 13, textDecoration: 'none', color: '#374151' }}>
-                    {String(l)} <span style={{ color: '#C8102E' }}>→</span>
+              <SideCard title="Immigration" href="/immigration">
+                {[['Entrée express','/immigration#entree-express'],['NBPNP','/immigration#nbpnp'],['Francophonie','/immigration#francophonie']].map(([label,href]) => (
+                  <Link key={href} href={href} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-soft)', fontSize: 13, textDecoration: 'none', color: 'var(--ink-soft)' }}>
+                    {label} <span style={{ color: 'var(--red)' }}>→</span>
                   </Link>
                 ))}
               </SideCard>
@@ -145,30 +151,27 @@ export default async function HomePage() {
   )
 }
 
-function Section({ title, href, color, children }: { title: string; href: string; color: string; children: React.ReactNode }) {
+function Section({ title, href, children }: { title: string; href: string; children: React.ReactNode }) {
   return (
     <section>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <h2 style={{ fontFamily: 'Source Serif 4,serif', fontSize: 20, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ width: 4, height: 22, background: color, borderRadius: 2, display: 'inline-block', flexShrink: 0 }} />
-          {title}
-        </h2>
-        <Link href={href} style={{ fontSize: 13, color: '#C8102E', textDecoration: 'none' }}>Tout voir →</Link>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16, borderBottom: '2px solid var(--ink)', paddingBottom: 10 }}>
+        <h2 style={{ fontFamily: 'Source Serif 4,serif', fontSize: 21, fontWeight: 600, color: 'var(--ink)' }}>{title}</h2>
+        <Link href={href} style={{ fontSize: 13, color: 'var(--red)', textDecoration: 'none' }}>Tout voir →</Link>
       </div>
-      <div style={{ display: 'grid', gap: 10 }}>{children}</div>
+      <div style={{ display: 'grid', gap: 12 }}>{children}</div>
     </section>
   )
 }
 
-function SideCard({ title, color, href, children }: { title: string; color: string; href: string; children: React.ReactNode }) {
+function SideCard({ title, href, children }: { title: string; href: string; children: React.ReactNode }) {
   return (
-    <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 10, overflow: 'hidden' }}>
-      <div style={{ background: color, padding: '11px 16px' }}>
-        <h3 style={{ fontFamily: 'Source Serif 4,serif', color: '#fff', fontSize: 14, fontWeight: 700 }}>{title}</h3>
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 6 }}>
+      <div style={{ padding: '13px 16px', borderBottom: '1px solid var(--border-soft)' }}>
+        <h3 style={{ fontFamily: 'Source Serif 4,serif', fontSize: 15, fontWeight: 600, color: 'var(--ink)' }}>{title}</h3>
       </div>
       <div style={{ padding: '0 16px' }}>{children}</div>
-      <div style={{ padding: '10px 16px' }}>
-        <Link href={href} style={{ fontSize: 13, color: '#C8102E', textDecoration: 'none', fontWeight: 600 }}>Tout voir →</Link>
+      <div style={{ padding: '11px 16px' }}>
+        <Link href={href} style={{ fontSize: 13, color: 'var(--red)', textDecoration: 'none', fontWeight: 500 }}>Tout voir →</Link>
       </div>
     </div>
   )
@@ -176,8 +179,8 @@ function SideCard({ title, color, href, children }: { title: string; color: stri
 
 function Empty() {
   return (
-    <div style={{ padding: '20px', textAlign: 'center', background: '#fff', border: '1px dashed #E5E7EB', borderRadius: 8 }}>
-      <div style={{ fontSize: 13, color: '#9CA3AF' }}>🔄 Collecte en attente</div>
+    <div style={{ padding: '20px', textAlign: 'center', background: 'var(--card)', border: '1px dashed var(--border)', borderRadius: 6 }}>
+      <div style={{ fontSize: 13, color: '#9C9C9C' }}>Collecte en attente</div>
     </div>
   )
 }
